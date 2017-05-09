@@ -13,7 +13,21 @@
     <CrossGenOutputPath>$(CrossGenRootPath)/$(MSBuildProjectName)/$(NuGetRuntimeIdentifier)</CrossGenOutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="project.json" />
+    <PackageReference Include="Microsoft.Private.CoreFx.NETCoreApp">
+      <Version>$(CoreFxVersion)</Version>
+    </PackageReference>
+    <PackageReference Include="transport.Microsoft.NETCore.Runtime.CoreCLR">
+      <Version>$(MicrosoftNETCoreRuntimeCoreCLRPackageVersion)</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.DiaSymReader.Native">
+      <Version>$(DiaSymReaderNativeVersion)</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NETCore.Platforms">
+      <Version>$(PlatformPackageVersion)</Version>
+    </PackageReference>
+    <PackageReference Include="NETStandard.Library">
+      <Version>$(StandardVersion)</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup Condition="'$(NuGetRuntimeIdentifier)' == ''">
     <!-- Bring in Platforms for RID graph, NETStandard.Library for build-tools, 
@@ -44,11 +58,11 @@
       <_runtimePackageId>%(_runtimeCLR.NuGetPackageId)</_runtimePackageId>
       <_runtimePackageVersion>%(_runtimeCLR.NuGetPackageVersion)</_runtimePackageVersion>
       <_runtimePackagePath>$(PackagesDir)/$(_runtimePackageId)/$(_runtimePackageVersion)</_runtimePackagePath>
-      
+
       <_crossGenPath>$(_runtimePackagePath)/tools$(_crossDir)/crossgen$(ApplicationFileExtension)</_crossGenPath>
       <_runtimeDirectory>%(_runtimeCLR.RootDir)%(_runtimeCLR.Directory)</_runtimeDirectory>
     </PropertyGroup>
-    
+
     <PropertyGroup Condition="'@(_runtimeCoreLib)' != ''">
       <_coreLibDirectory>%(_runtimeCoreLib.RootDir)%(_runtimeCoreLib.Directory)</_coreLibDirectory>
     </PropertyGroup>
@@ -60,7 +74,7 @@
       <_jitPath>%(_runtimeJIT.FullPath)</_jitPath>
       <_jitPath Condition="'$(_crossDir)' != ''">$(_jitPackagePath)/runtimes$(_crossDir)/native/$(LibraryFilePrefix)clrjit$(LibraryFileExtension)</_jitPath>
     </PropertyGroup>
-    
+
     <PropertyGroup Condition="'@(_fxSystemRuntime)' != ''">
       <_fxLibDirectory>%(_fxSystemRuntime.RootDir)%(_fxSystemRuntime.Directory)</_fxLibDirectory>
     </PropertyGroup>
@@ -139,13 +153,13 @@
       <_crossGenIntermediatePath>$(IntermediateOutputPath)/crossgen</_crossGenIntermediatePath>
     </PropertyGroup>
     <ItemGroup>
-      <_filesToCrossGen Include="@(FilesToPackage)" 
+      <_filesToCrossGen Include="@(FilesToPackage)"
                         Condition="'%(FilesToPackage.IsNative)' != 'true' AND '%(FileName)' != 'System.Private.CoreLib' AND '%(FileName)' != 'mscorlib' AND '%(Extension)' == '.dll'">
         <CrossGenedPath>$(CrossGenOutputPath)/%(TargetPath)/%(FileName)%(Extension)</CrossGenedPath>
       </_filesToCrossGen>
 
       <FilesToPackage Remove="@(_filesToCrossGen)" />
-      
+
       <_crossGenedFilesToPackage Include="@(_filesToCrossGen->'%(CrossGenedPath)')" />
       <FilesToPackage Include="@(_crossGenedFilesToPackage)" />
     </ItemGroup>
@@ -158,7 +172,7 @@
       <!-- the following path must be passed to crossgen to locate all dependencies. -->
       <_crossgenPlatformDirectories Include="%(_filesToCrossGen.RootDir)%(_filesToCrossGen.Directory)" />
     </ItemGroup>
-    
+
     <PropertyGroup>
       <!-- Use PathSeparator so that we get a ':' on unix and ';' on windows
            Escape the value so that the ';' doesn't result multiple lines when writing to the RSP file -->
@@ -188,7 +202,7 @@
 
     <Exec Command="$(_crossGenPath) @$(_crossGenResponseFile)" WorkingDirectory="$(_clrDirectory)" EnvironmentVariables="COMPlus_PartialNGen=0" />
   </Target>
-  
+
   <Target Name="GetFilesToPackage" DependsOnTargets="ResolveNuGetPackages;GetFilesFromPackages;PrepareForCrossGen" Returns="@(FilesToPackage)" />
 
   <Target Name="GetDependenciesToPackage" Condition="'@(DependenciesToPackage)' != ''" DependsOnTargets="ResolveNuGetPackages" Returns="@(_DependenciesToPackageWithVersion)">
@@ -207,7 +221,7 @@
       <ReferencedPackage Include="@(PackageMatch -> '%(PackageId)')" Condition="'%(PackageMatch.PackageVersion)' != ''">
         <Version>%(PackageMatch.PackageVersion)</Version>
       </ReferencedPackage>
-      
+
       <!-- intersect ReferencedPackage with DependenciesToPackage -->
       <_DependenciesToPackageWithVersion Include="@(ReferencedPackage)" Condition="'@(ReferencedPackage)' == '@(DependenciesToPackage)' AND '%(Identity)' != ''">
         <TargetFramework>$(PackageTargetFramework)</TargetFramework>
@@ -216,10 +230,10 @@
 
     <Message Importance="low" Text="%(_DependenciesToPackageWithVersion.Identity) : %(_DependenciesToPackageWithVersion.Version) : %(_DependenciesToPackageWithVersion.TargetFramework)" />
   </Target>
- 
+
   <!-- Run crossgen -->
   <Target Name="Build" DependsOnTargets="CrossGen;GetFilesToPackage" />
-  
+
   <!-- remove when fixing https://github.com/dotnet/buildtools/issues/1273 -->
   <Target Name="DetermineRuntimeDependencies" />
 </Project>

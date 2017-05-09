@@ -15,9 +15,12 @@
   </PropertyGroup>
   
   <PropertyGroup>
-    <PlatformPackageVersion>2.0.0-preview2-25303-04</PlatformPackageVersion>
+    <CoreFxVersion>2.0.0-preview2-25303-04</CoreFxVersion>
+    <PlatformPackageVersion>$(CoreFxVersion)</PlatformPackageVersion>
     <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.0.0-preview2-25303-02</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <MicrosoftNETCoreRuntimeJitPackageVersion>$(MicrosoftNETCoreRuntimeCoreCLRPackageVersion)</MicrosoftNETCoreRuntimeJitPackageVersion>
+    <StandardVersion>2.0.0-preview2-25303-04</StandardVersion>
+    <DiaSymReaderNativeVersion>1.4.1</DiaSymReaderNativeVersion>
   </PropertyGroup>
   
   <!-- Package dependency verification/auto-upgrade configuration. -->
@@ -47,13 +50,18 @@
     
     <XmlUpdateStep Include="CoreFx">
       <Path>$(MSBuildThisFileFullPath)</Path>
-      <ElementName>PlatformPackageVersion</ElementName>
+      <ElementName>CoreFxVersion</ElementName>
       <PackageId>Microsoft.NETCore.Platforms</PackageId>
     </XmlUpdateStep>
     <XmlUpdateStep Include="CoreClr">
       <Path>$(MSBuildThisFileFullPath)</Path>
       <ElementName>MicrosoftNETCoreRuntimeCoreCLRPackageVersion</ElementName>
       <PackageId>Microsoft.NETCore.Runtime.CoreCLR</PackageId>
+    </XmlUpdateStep>
+    <XmlUpdateStep Include="Standard">
+      <Path>$(MSBuildThisFileFullPath)</Path>
+      <ElementName>StandardVersion</ElementName>
+      <PackageId>NETStandard.Library</PackageId>
     </XmlUpdateStep>
   </ItemGroup>
 </Project>
